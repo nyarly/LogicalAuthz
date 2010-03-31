@@ -45,16 +45,15 @@ module GroupAuthz
       :subject_id => nil
     }
 
-    permissions = GroupAuthz::Permission.find(:first, :conditions => select_on)
-    return true unless permissions.nil?
-
-    select_on[:action] = criteria[:action_aliases].map{|a| a.to_s}
-    permissions = GroupAuthz::Permission.find(:first, :conditions => select_on)
-    return true unless permissions.nil?
-
-    select_on[:subject_id] = criteria[:id]
-    permissions = GroupAuthz::Permission.find(:first, :conditions => select_on)
-    return (not permissions.nil?)
+    return GroupAuthz::Permission.exists?(["controller = :controller AND group_id IN :group_ids AND
+                                   ((action IS NULL AND id IS NULL) OR
+                                    (action IN :action_names AND 
+                                     (id IS NULL OR id = :subject_id)))",
+                                   :group_ids => criteria[:group].map {|grp| grp.id},
+                                   :controller => controller_class.controller_path,
+                                   :action_names => criteria[:action_aliases].map {|a| a.to_s},
+                                   :subject_id => criteria[:id]
+                                  )
   end
 
   module Application
