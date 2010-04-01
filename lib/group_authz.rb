@@ -45,10 +45,11 @@ module GroupAuthz
       :subject_id => nil
     }
 
-    return GroupAuthz::Permission.exists?(["controller = :controller AND group_id IN :group_ids AND
-                                   ((action IS NULL AND id IS NULL) OR
-                                    (action IN :action_names AND 
-                                     (id IS NULL OR id = :subject_id)))",
+    return GroupAuthz::Permission.exists?(["controller = :controller AND 
+                                            group_id IN (:group_ids) AND
+                                            ((action IS NULL AND id IS NULL) OR
+                                             (action IN (:action_names) AND 
+                                              (id IS NULL OR id = :subject_id)))",
                                      {
       :group_ids => criteria[:group].map {|grp| grp.id},
       :controller => controller_class.controller_path,
