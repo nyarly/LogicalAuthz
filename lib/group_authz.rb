@@ -12,6 +12,10 @@ module GroupAuthz
     controller_class = ::ApplicationController
 
     case criteria[:controller]
+    when Class
+      if GroupAuthz::Application > criteria[:controller]
+        controller_class = criteria[:controller]
+      end
     when GroupAuthz::Application
       controller_class = criteria[:controller].class
     when String, Symbol
@@ -25,7 +29,7 @@ module GroupAuthz
     #TODO Fail if controller unspecified?
 
     criteria[:group] = criteria.has_key?(:group) ? [*criteria[:group]] : []
-    if criteria.has_key?(:user)
+    if criteria.has_key?(:user) and not criteria[:user].nil?
       criteria[:group] += criteria[:user].groups
     end
     criteria[:groups] = criteria[:group]
@@ -74,11 +78,6 @@ module GroupAuthz
 
     def check_authorized
       current_user = AuthnFacade.current_user(self)
-      if current_user.blank?
-        redirect_to_lobby("You are not authorized to perform this action.  Perhaps you need to log in?")
-        flash[:group_authorization] = false
-        return false
-      end
 
       criteria = {
         :user => current_user, 
