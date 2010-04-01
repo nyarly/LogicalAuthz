@@ -49,11 +49,11 @@ module GroupAuthz
                                    ((action IS NULL AND id IS NULL) OR
                                     (action IN :action_names AND 
                                      (id IS NULL OR id = :subject_id)))",
-                                   :group_ids => criteria[:group].map {|grp| grp.id},
-                                   :controller => controller_class.controller_path,
-                                   :action_names => criteria[:action_aliases].map {|a| a.to_s},
-                                   :subject_id => criteria[:id]
-                                  )
+                                     {
+      :group_ids => criteria[:group].map {|grp| grp.id},
+      :controller => controller_class.controller_path,
+      :action_names => criteria[:action_aliases].map {|a| a.to_s},
+      :subject_id => criteria[:id] }])
   end
 
   module Application
