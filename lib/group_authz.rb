@@ -6,6 +6,13 @@ module GroupAuthz
     "((action IS NULL AND subject_id IS NULL) OR " +
     "(action IN (:action_names) AND " +
     "(subject_id IS NULL OR subject_id = :subject_id)))"
+
+  class << self
+    attr_accessor :unauthorized_groups
+  end
+
+  unauthorized_groups = []
+
   def self.is_authorized?(criteria={})
     criteria ||= {}
 
@@ -32,7 +39,9 @@ module GroupAuthz
     if criteria.has_key?(:user) and not criteria[:user].nil?
       criteria[:group] += criteria[:user].groups
     end
-    criteria[:groups] = criteria[:group]
+    if criteria[:group].empty?
+      criteria[:group] += unauthorized_groups
+    end
 
     #TODO Fail if group unspecified and user unspecified?
 
