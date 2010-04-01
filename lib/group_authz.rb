@@ -127,6 +127,7 @@ module GroupAuthz
       
       def grant_aliases_for(action)
         grant_aliases = read_inheritable_attribute(:grant_alias_hash)
+        action = action.to_sym
 
         if not grant_aliases.nil? and grant_aliases.has_key?(action)
           return grant_aliases[action]
