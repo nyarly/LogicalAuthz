@@ -8,10 +8,19 @@ module GroupAuthz
     "(subject_id IS NULL OR subject_id = :subject_id)))"
 
   class << self
-    attr_accessor :unauthorized_groups
+    def unauthorized_groups
+      @unauthorized_groups ||= unauthorized_group_names.map do |name|
+        Group.find_by_name(name)
+      end
+    end
+    def clear_unauthorized_groups
+      @unauthorized_groups = nil
+    end
+
+    attr_accessor :unauthorized_group_names
   end
 
-  unauthorized_groups = []
+  unauthorized_group_names = []
 
   def self.is_authorized?(criteria={})
     criteria ||= {}
