@@ -9,9 +9,14 @@ module GroupAuthz
 
   class << self
     def unauthorized_groups
-      @unauthorized_groups ||= unauthorized_group_names.map do |name|
+      return @unauthorized_groups unless @unauthorized_groups.nil?
+      groups = unauthorized_group_names.map do |name|
         Group.find_by_name(name)
       end
+      if Rails.configuration.cache_classes
+        @unauthorized_groups = groups 
+      end
+      return groups
     end
     def clear_unauthorized_groups
       @unauthorized_groups = nil
@@ -44,7 +49,7 @@ module GroupAuthz
 
     #TODO Fail if controller unspecified?
 
-    criteria[:group] = criteria.has_key?(:group) ? [*criteria[:group]] : []
+    criteria[:group] = criteria[:group].nil? ? [] : [*criteria[:group]]
     if criteria.has_key?(:user) and not criteria[:user].nil?
       criteria[:group] += criteria[:user].groups
     end
